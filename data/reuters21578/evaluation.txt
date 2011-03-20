@@ -1,0 +1,10 @@
+Lucene stems								Wordnet stems
+------------								------------
+	
+K-means:
+F-measure:  0.52756288396282				F-measure:  0.641393713862843
+
+Single Linkage HAC:
+F-measure:  0.298940821243491				F-measure:  0.489648742506139
+
+

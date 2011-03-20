@@ -1,0 +1,11 @@
+
+-- straight forward clustering, k-means like or other.
+
+		Run core clustering on more parameters, neglect small sized clusters
+		LOF (outlier detection), reverse it for core extraction
+		Dynamic neighborhood threshold vs static thresholds
+		More complex similarity (concept/ontology)
+
+-----
+
+-- Run typical clustering first, get cores of each cluster, and extract cluster concepts from its cores (term coocurrence)

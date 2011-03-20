@@ -1,0 +1,7 @@
+At threshold = 0.2, minPoints = 5: Number of clusters = 8, Expected Density = 1.3074538093189876, F-measure = 0.103358613217768
+At threshold = 0.2, minPoints = 8: Number of clusters = 4, Expected Density = 1.2168306600366001, F-measure = 0.102968834147485
+At threshold = 0.2, minPoints = 11: Number of clusters = 5, Expected Density = 1.1571855643926112, F-measure = 0.238275641937469
+At threshold = 0.25, minPoints = 5: Number of clusters = 12, Expected Density = 1.1337567495243317, F-measure = 0.224082319579383
+At threshold = 0.2, minPoints = 14: Number of clusters = 4, Expected Density = 1.1118936631109346, F-measure = 0.214271032889305
+At threshold = 0.25, minPoints = 8: Number of clusters = 8, Expected Density = 1.0592826448894197, F-measure = 0.219854611540209
+At threshold = 0.2, minPoints = 17: Number of clusters = 4, Expected Density = 1.0533993532879984, F-measure = 0.207575711535503

@@ -1,0 +1,14 @@
+config.stop_words_path = config/stopwords
+config.concept_level = hypernyms
+config.wsd_type = simplified_lesk_plus
+config.concept_alpha = 0.5
+config.wsd_context = 0
+data.collection_path = data/reuters21578/test_docs
+data.results_path = data/reuters21578/test_results/synonyms & hypernyms - simplesk_plus
+data.kmeans_size = 5
+data.hac_size = 5
+data.dbscan_threshold = 0.2
+data.dbscan_minPoints = 17
+data.max_file_size = 10000
+coring.neighborhood = 0.5
+coring.size_threshold = 10

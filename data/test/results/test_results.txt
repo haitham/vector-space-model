@@ -1,0 +1,10 @@
+test_1.txt: 10 words
+cry: frequency(1), score(0.0)
+cat: frequency(2), score(0.0)
+eat: frequency(1), score(0.0)
+quick: frequency(1), score(0.0)
+independent: frequency(1), score(0.0)
+fox: frequency(1), score(0.0)
+city: frequency(2), score(0.0)
+chicken: frequency(1), score(0.0)
+

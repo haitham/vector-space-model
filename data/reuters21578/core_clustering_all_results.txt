@@ -1,0 +1,15 @@
+At threshold = 0.35, minPoints = 17: Number of clusters = 3, Expected Density = 0.8849173704724447
+At threshold = 0.4, minPoints = 14: Number of clusters = 3, Expected Density = 0.7856251958802081
+At threshold = 0.5, minPoints = 17: Number of clusters = 2, Expected Density = 0.781635957346673
+At threshold = 0.4, minPoints = 17: Number of clusters = 2, Expected Density = 0.7811098091059676
+At threshold = 0.45, minPoints = 17: Number of clusters = 2, Expected Density = 0.7730756415280794
+At threshold = 0.35, minPoints = 11: Number of clusters = 8, Expected Density = 0.7079969177694023
+At threshold = 0.3, minPoints = 17: Number of clusters = 6, Expected Density = 0.6978155489828632
+At threshold = 0.5, minPoints = 8: Number of clusters = 8, Expected Density = 0.6902135707462641
+At threshold = 0.3, minPoints = 14: Number of clusters = 8, Expected Density = 0.6807734068453642
+At threshold = 0.45, minPoints = 14: Number of clusters = 3, Expected Density = 0.6686239964367138
+At threshold = 0.5, minPoints = 14: Number of clusters = 3, Expected Density = 0.6607978217842481
+At threshold = 0.45, minPoints = 11: Number of clusters = 5, Expected Density = 0.6372050714607586
+At threshold = 0.4, minPoints = 11: Number of clusters = 9, Expected Density = 0.6331708999520366
+At threshold = 0.45, minPoints = 8: Number of clusters = 8, Expected Density = 0.611207358423011
+At threshold = 0.5, minPoints = 11: Number of clusters = 6, Expected Density = 0.5423843531995647

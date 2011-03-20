@@ -1,0 +1,15 @@
+At threshold = 0.35, minPoints = 17: Number of clusters = 3, F-measure = 0.163630282288405
+At threshold = 0.4, minPoints = 14: Number of clusters = 3, F-measure = 0.202760103348339
+At threshold = 0.5, minPoints = 17: Number of clusters = 2, F-measure = 0.0950508030154048
+At threshold = 0.4, minPoints = 17: Number of clusters = 2, F-measure = 0.0973419295963427
+At threshold = 0.45, minPoints = 17: Number of clusters = 2, F-measure = 0.10734905826439
+At threshold = 0.35, minPoints = 11: Number of clusters = 8, F-measure = 0.325414827533059
+At threshold = 0.3, minPoints = 17: Number of clusters = 6, F-measure = 0.4071163195026
+At threshold = 0.5, minPoints = 8: Number of clusters = 8, F-measure = 0.315103400558136
+At threshold = 0.3, minPoints = 14: Number of clusters = 8, F-measure = 0.353842222839123
+At threshold = 0.45, minPoints = 14: Number of clusters = 3, F-measure = 0.135094303650098
+At threshold = 0.5, minPoints = 14: Number of clusters = 3, F-measure = 0.169200830433801
+At threshold = 0.45, minPoints = 11: Number of clusters = 5, F-measure = 0.310993868899167
+At threshold = 0.4, minPoints = 11: Number of clusters = 9, F-measure = 0.342672864660349
+At threshold = 0.45, minPoints = 8: Number of clusters = 8, F-measure = 0.399601608273037
+At threshold = 0.5, minPoints = 11: Number of clusters = 6, F-measure = 0.246129481532266
