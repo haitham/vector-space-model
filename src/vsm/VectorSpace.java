@@ -28,7 +28,8 @@ public class VectorSpace {
 							   properties.getProperty("config.concept_level"),
 							   new Double(properties.getProperty("config.concept_alpha")), 
 							   properties.getProperty("config.wsd_type"),
-							   new Integer(properties.getProperty("config.wsd_context"))
+							   new Integer(properties.getProperty("config.wsd_context")),
+							   "true".equals(properties.getProperty("config.senses_log"))
 		);
 //		size = Document.getAllDocuments().size();
 //		theta = Math.log(weight(Document.getAllDocuments())) / Math.log(size);

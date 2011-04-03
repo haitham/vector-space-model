@@ -2,8 +2,10 @@ package vsm;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +31,7 @@ public class Document {
 //	private HashMap<Document, Double> similarities;
 	private HashMap<Document, Double> termSimilarities;
 	private HashMap<Document, Double> senseSimilarities;
+	private List<Term> orderedTerms;
 	private Node node;
 	private HashMap<Double, Integer> neighborhoodSizes;
 	
@@ -38,6 +41,13 @@ public class Document {
 	private static Double conceptAlpha;
 	private static String wsdType;
 	private static Integer wsdContext;
+	private static Boolean sensesLog;
+	private static String sensesLogPath;
+	private static OutputStreamWriter sensesLogger;
+	
+	public static Boolean windowContext(){
+		return (wsdContext > 0);
+	}
 	
 	public static boolean includeSynonyms(){
 		return("synonyms".equals(conceptLevel) || "hypernyms".equals(conceptLevel));
@@ -74,6 +84,7 @@ public class Document {
 		termScores = new HashMap<Term, Double>();
 //		similarities = new HashMap<Document, Double>();
 		termSimilarities = new HashMap<Document, Double>();
+		orderedTerms = new ArrayList<Term>();
 		if (includeSynonyms()){
 			this.senseSize = 0;
 			senseFrequencies = new HashMap<WordNetSense, Integer>();
@@ -82,13 +93,31 @@ public class Document {
 		}
 		node = new Node();
 		neighborhoodSizes = new HashMap<Double, Integer>();
+		
+		if (sensesLog){
+			try {
+				sensesLogger = new OutputStreamWriter(new FileOutputStream(new File(sensesLogPath + "/" + getFileName())));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		analyze();
+		
+		if (sensesLog){
+			try {
+				sensesLogger.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private Document(List<Document> aggregate){
 		termScores = new HashMap<Term, Double>();
 //		similarities = new HashMap<Document, Double>();
 		termSimilarities = new HashMap<Document, Double>();
+		orderedTerms = new ArrayList<Term>();
 		this.termSize = 0;
 		Iterator<Term> termsIterator = Term.getAllTerms().iterator();
 		Term term;
@@ -165,7 +194,7 @@ public class Document {
 				addToken(token);
 				token = stream.next();
 			}
-			addSensesIfIncluded(termFrequencies.keySet());
+			addSensesIfIncluded(orderedTerms);
 		} catch (FileNotFoundException e) {
 			System.out.println("Failed to load document: " + file.getName());
 			e.printStackTrace();
@@ -199,7 +228,21 @@ public class Document {
 		return overlap;
 	}
 	
-	private List<WordNetSense> refineSenses(Term term, List<WordNetSense> senses, HashMap<Term, List<WordNetSense>> termSenses){
+	private static void logSenses(Term term, List<WordNetSense> senses){
+		if (sensesLog){
+			try {
+				sensesLogger.write(term.getValue() + "\n");
+				for (WordNetSense sense : senses){
+					sensesLogger.write(sense.getPos() + ": " + sense.getGloss() + "\n");
+				}
+				sensesLogger.write("\n\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private List<WordNetSense> refineSenses(Term term, List<WordNetSense> senses, List<Term> context, HashMap<Term, List<WordNetSense>> termSenses){
 		List<WordNetSense> selectedSenses = new ArrayList<WordNetSense>();
 		if (wsdPrimitive()){
 			Integer maxMatch = -1;
@@ -208,16 +251,16 @@ public class Document {
 				List<String> glossTerms = sense.getGlossTerms();
 				Integer match = 0;
 				// for each term in the context
-				for (Term docTerm : termSenses.keySet()){
+				for (Term contextTerm : context){
 					// ignore congruent terms
-					if (term.getValue().equals(docTerm.getValue())){
+					if (term.getValue().equals(contextTerm.getValue())){
 						continue;
 					}
 					if (wsdSimplifiedLesk()){
-						Integer maxOverlap = -1;
+						Integer maxOverlap = 0;
 						// for each sense of the context term
-						for (WordNetSense docTermSense : termSenses.get(docTerm)){
-							Integer overlap = getOverlap(glossTerms, docTerm, docTermSense);
+						for (WordNetSense docTermSense : termSenses.get(contextTerm)){
+							Integer overlap = getOverlap(glossTerms, contextTerm, docTermSense);
 							if (overlap > maxOverlap){
 								maxOverlap = overlap;
 							}
@@ -227,12 +270,12 @@ public class Document {
 						//for each gloss term of the tested sense
 						for (String glossTerm : glossTerms){
 							// match: context term == a gloss term of the tested sense
-							if (docTerm.getValue().equals(glossTerm)){
+							if (contextTerm.getValue().equals(glossTerm)){
 								match ++;
 							}
 							if (wsdExpandedPrimitive()){
 								// for each sense of the context term
-								for (WordNetSense docTermSense : termSenses.get(docTerm)){
+								for (WordNetSense docTermSense : termSenses.get(contextTerm)){
 									List<String> docTermSenseGlossTerms = docTermSense.getGlossTerms();
 									// for each term of the sense of the context term
 									for (String docTermSenseGlossTerm : docTermSenseGlossTerms){
@@ -258,17 +301,37 @@ public class Document {
 		return selectedSenses;
 	}
 	
-	private void addSensesIfIncluded(Set<Term> docTerms){
+	private void addSensesIfIncluded(List<Term> docTerms){
 		if (includeSynonyms()){
 			HashMap<Term, List<WordNetSense>> termSenses = new HashMap<Term, List<WordNetSense>>();
 			for (Term term : docTerms){
 				termSenses.put(term, WordNetSense.getSenses(term.getValue()));
 			}
-			for (Term term : docTerms){
+			for (int i=0; i<docTerms.size(); i++){
+				Term term = docTerms.get(i);
+				
+				List<Term> context = null;
+				if (windowContext()){
+					//extract context sublist
+					//start is inclusive
+					Integer start = i - wsdContext;
+					if (start < 0){
+						start = 0;
+					}
+					//end is exclusive
+					Integer end = i + wsdContext + 1;
+					if (end > docTerms.size()){
+						end = docTerms.size();
+					}
+					context = docTerms.subList(start, end);
+				} else {
+					context = docTerms;
+				}
+				
 				List<WordNetSense> senses = termSenses.get(term);
 				
 				if (includeWsd()){
-					senses = refineSenses(term, senses, termSenses);
+					senses = refineSenses(term, senses, context, termSenses);
 				}
 				
 				senseSize += senses.size();
@@ -292,6 +355,7 @@ public class Document {
 						}
 					}
 				}
+				logSenses(term, senses);
 			}
 		}
 	}
@@ -299,6 +363,7 @@ public class Document {
 	private void addToken(Token token){
 		termSize ++;
 		Term term = Term.getTerm(token.term());
+		orderedTerms.add(term);
 		Integer termFrequency = termFrequencies.get(term);
 		if ( termFrequency == null ){
 			termFrequencies.put(term, 1);
@@ -406,15 +471,29 @@ public class Document {
 		}
 	}
 	
-	public static void loadDocuments(String path, String stopWordsPath, String desiredConceptLevel, Double desiredConceptAlpha, String desiredWsdType, Integer desiredWsdContext){
+	public static void loadDocuments(String path,
+									 String stopWordsPath,
+									 String desiredConceptLevel,
+									 Double desiredConceptAlpha,
+									 String desiredWsdType,
+									 Integer desiredWsdContext,
+									 Boolean doSensesLog
+	){
 		stop_words = new File(stopWordsPath);
 		allDocuments = new ArrayList<Document>();
 		conceptLevel = desiredConceptLevel;
 		conceptAlpha = desiredConceptAlpha;
 		wsdType = desiredWsdType;
 		wsdContext = desiredWsdContext;
+		sensesLog = doSensesLog;
 		Iterator<File> iterator = Arrays.asList(new File(path).listFiles()).iterator();
 		int filesCounter=0;
+		if (sensesLog){
+			sensesLogPath = "data/reuters21578/test_results/Representations/" + conceptLevel + " - " + wsdType + " - " + wsdContext;
+			new File(sensesLogPath).mkdir();
+		}
+		System.out.println("Logging: " + sensesLog.toString());
+		System.out.println("Windowing: " + windowContext().toString() + " " + wsdContext.toString());
 		while ( iterator.hasNext() ){
 			filesCounter ++;
 			System.out.println("loading doc:" + filesCounter);

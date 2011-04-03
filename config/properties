@@ -1,10 +1,11 @@
+config.senses_log = true
 config.stop_words_path = config/stopwords
-config.concept_level = hypernyms
-config.wsd_type = simplified_lesk_plus
+config.concept_level = synonyms
+config.wsd_type = simplified_lesk
 config.concept_alpha = 0.5
-config.wsd_context = 0
+config.wsd_context = 3
 data.collection_path = data/reuters21578/test_docs
-data.results_path = data/reuters21578/test_results/synonyms & hypernyms - simplesk_plus
+data.results_path = data/reuters21578/test_results/synonyms - simplesk - 3
 data.kmeans_size = 5
 data.hac_size = 5
 data.dbscan_threshold = 0.2
