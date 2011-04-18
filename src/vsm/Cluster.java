@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 public abstract class Cluster {
-
-	// This class represents an abstract cluster
 	
 	protected List<Document> documents;
 	protected HashMap<Cluster, Double> similarities;
