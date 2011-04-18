@@ -65,6 +65,10 @@ public class Document {
 		return ("primitive".equals(wsdType) || "expanded_primitive".equals(wsdType)) || "simplified_lesk".equals(wsdType) || ("simplified_lesk_plus".equals(wsdType));
 	}
 	
+	public static boolean wsdAdaptedLesk(){
+		return ("adapted_lesk".equals(wsdType));
+	}
+	
 	public static boolean wsdExpandedPrimitive(){
 		return ("expanded_primitive".equals(wsdType));
 	}
@@ -228,6 +232,22 @@ public class Document {
 		return overlap;
 	}
 	
+	private Integer getAdaptedLeskOverlap(WordNetSense sense1, WordNetSense sense2){
+		if (sense1 == null || sense2 == null){
+			return 0;
+		}
+		Integer overlap = 0;
+		for (String sense1GlossTerm : sense1.getGlossTerms()){
+			for (String sense2GlossTerm : sense2.getGlossTerms()){
+				if (sense1GlossTerm.equals(sense2GlossTerm)){
+					overlap ++;
+				}
+			}
+		}
+		
+		return overlap;
+	}
+	
 	private static void logSenses(Term term, List<WordNetSense> senses){
 		if (sensesLog){
 			try {
@@ -242,7 +262,75 @@ public class Document {
 		}
 	}
 	
-	private List<WordNetSense> refineSenses(Term term, List<WordNetSense> senses, List<Term> context, HashMap<Term, List<WordNetSense>> termSenses){
+	private List<WordNetSense> refineAdaptedLesk(Integer termContextIndex, List<Term> context, HashMap<Term, List<WordNetSense>> termSenses){
+		if (!windowContext()){
+			throw new UnsupportedOperationException("wsd_type: adapted_lesk must be used with wsd_context > 0");
+		}
+		List<WordNetSense> maxSenses = new ArrayList<WordNetSense>();
+		
+		// Get lists of context senses 
+		List<List<WordNetSense>> contextSenses = new ArrayList<List<WordNetSense>>();
+		List<Integer> contextIndexes = new ArrayList<Integer>();
+		for (Term neighbor : context){
+			contextSenses.add(termSenses.get(neighbor));
+			contextIndexes.add(0);
+		}
+		
+		// Loop on all combinations
+		Boolean done = false;
+		Integer maxScore = -1;
+		while (!done){
+			// combination available at contextSenses.get(i).get(contextIndexes.get(i)) for all i
+			List<WordNetSense> combination = new ArrayList<WordNetSense>();
+			for (int i=0; i<context.size(); i++){
+				List<WordNetSense> neighborSenses = contextSenses.get(i);
+				if (neighborSenses.size() > 0){
+					combination.add(neighborSenses.get(contextIndexes.get(i)));
+				} else { // term with 0 senses
+					combination.add(null);
+				}
+			}
+			
+			Integer combinationScore = 0;
+			// Looping on combination pairs i & j
+			for (int i=0; i<combination.size(); i++){
+				for (int j=i+1; j<combination.size(); j++){
+					combinationScore += getAdaptedLeskOverlap(combination.get(i), combination.get(j));
+				}
+			}
+			
+			// check for max?
+			WordNetSense candidate = combination.get(termContextIndex);
+			if (maxScore == combinationScore && candidate != null && !maxSenses.contains(candidate)){
+				maxSenses.add(candidate);
+			} else if (maxScore < combinationScore && candidate != null){
+				maxScore = combinationScore;
+				maxSenses = new ArrayList<WordNetSense>();
+				maxSenses.add(candidate);
+			}
+			
+			// start advancing indexes until one is not at its end
+			for (int i=0; i<contextIndexes.size(); i++){
+				Integer index = contextIndexes.get(i);
+				index ++;
+				if (index < contextSenses.get(i).size()){ // still within range: set and break
+					contextIndexes.set(i, index);
+					break;
+				} else { // end of its range: reset and continue to next index
+					contextIndexes.set(i, 0);
+					if (i == (contextIndexes.size() - 1)){ // resetting highest significant index: terminate
+						done = true;
+					}
+				}
+			}
+		}
+		
+		return maxSenses;
+	}
+	
+	private List<WordNetSense> refineSenses(Integer termContextIndex, List<Term> context, HashMap<Term, List<WordNetSense>> termSenses){
+		Term term = context.get(termContextIndex);
+		List<WordNetSense> senses = termSenses.get(term);
 		List<WordNetSense> selectedSenses = new ArrayList<WordNetSense>();
 		if (wsdPrimitive()){
 			Integer maxMatch = -1;
@@ -297,6 +385,8 @@ public class Document {
 					selectedSenses.add(sense);
 				}
 			}
+		} else if (wsdAdaptedLesk()){
+			selectedSenses = refineAdaptedLesk(termContextIndex, context, termSenses);
 		}
 		return selectedSenses;
 	}
@@ -311,12 +401,15 @@ public class Document {
 				Term term = docTerms.get(i);
 				
 				List<Term> context = null;
+				Integer termContextIndex = null;
 				if (windowContext()){
 					//extract context sublist
 					//start is inclusive
 					Integer start = i - wsdContext;
+					termContextIndex = wsdContext;
 					if (start < 0){
 						start = 0;
+						termContextIndex = i;
 					}
 					//end is exclusive
 					Integer end = i + wsdContext + 1;
@@ -325,13 +418,14 @@ public class Document {
 					}
 					context = docTerms.subList(start, end);
 				} else {
+					termContextIndex = i;
 					context = docTerms;
 				}
 				
 				List<WordNetSense> senses = termSenses.get(term);
 				
 				if (includeWsd()){
-					senses = refineSenses(term, senses, context, termSenses);
+					senses = refineSenses(termContextIndex, context, termSenses);
 				}
 				
 				senseSize += senses.size();
