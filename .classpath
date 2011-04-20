@@ -2,29 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/apache-solr-core-1.4.0.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/apache-solr-dataimporthandler-1.4.0.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/apache-solr-solrj-1.4.0.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/commons-csv-1.0-SNAPSHOT-r609327.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/commons-fileupload-1.2.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/commons-httpclient-3.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/commons-io-1.4.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/geronimo-stax-api_1.0_spec-1.0.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/jcl-over-slf4j-1.5.5.jar"/>
 	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/lucene-analyzers-2.9.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/lucene-core-2.9.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/lucene-highlighter-2.9.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/lucene-memory-2.9.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/lucene-misc-2.9.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/lucene-queries-2.9.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/lucene-snowball-2.9.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/lucene-spellchecker-2.9.1.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/slf4j-api-1.5.5.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/slf4j-jdk14-1.5.5.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/wstx-asl-3.2.7.jar"/>
 	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/ritaWN.jar"/>
 	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/supportWN.jar"/>
-	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/core1.0.jar"/>
+	<classpathentry kind="lib" path="D:/MSc/Thesis/Workspace/VSM/lib/lucene-core-2.9.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
