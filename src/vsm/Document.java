@@ -1,11 +1,16 @@
 package vsm;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -79,6 +84,34 @@ public class Document {
 	
 	public static boolean wsdSimplifiedLeskPlus(){
 		return ("simplified_lesk_plus".equals(wsdType));
+	}
+	
+	public Document(File file, Boolean isDump){
+		this.file = file;
+		this.termSize = 0;
+		termFrequencies = new HashMap<Term, Integer>();
+		termScores = new HashMap<Term, Double>();
+		termSimilarities = new HashMap<Document, Double>();
+		if (includeSynonyms()){
+			this.senseSize = 0;
+			senseFrequencies = new HashMap<WordNetSense, Integer>();
+			senseScores = new HashMap<WordNetSense, Double>();
+			senseSimilarities = new HashMap<Document, Double>();
+		}
+		try {
+			BufferedReader docReader = new BufferedReader(new InputStreamReader(new DataInputStream(new FileInputStream(file))));
+			String line;
+			while((line = docReader.readLine()).length() > 0){
+				String[] lineParts = line.split(":");
+				addTerm(lineParts[0], new Integer(lineParts[lineParts.length - 1]));
+			}
+			while((line = docReader.readLine()) != null){
+				String[] lineParts = line.split(":");
+				addSense(new Integer(lineParts[0]), new Integer(lineParts[1]));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public Document(File file){
@@ -456,7 +489,7 @@ public class Document {
 	
 	private void addToken(Token token){
 		termSize ++;
-		Term term = Term.getTerm(token.term());
+		Term term = Term.getTerm(token.term(), false);
 		orderedTerms.add(term);
 		Integer termFrequency = termFrequencies.get(term);
 		if ( termFrequency == null ){
@@ -465,6 +498,20 @@ public class Document {
 		}else{
 			termFrequencies.put(term, termFrequency + 1);
 		}
+	}
+	
+	private void addSense(Integer senseId, Integer frequency){
+		senseSize += frequency;
+		WordNetSense sense = WordNetSense.getSense(senseId);
+		sense.addDocument(this);
+		senseFrequencies.put(sense, frequency);
+	}
+	
+	private void addTerm(String stem, Integer frequency){
+		termSize += frequency;
+		Term term = Term.getTerm(stem, true);
+		term.addDocument(this);
+		termFrequencies.put(term, frequency);
 	}
 	
 	private Double tfIdf(Term term){
@@ -565,13 +612,67 @@ public class Document {
 		}
 	}
 	
+	public void saveRepresentation(String saveDir){
+		try {
+			new File(saveDir).mkdir();
+			OutputStreamWriter docWriter = new OutputStreamWriter(new FileOutputStream(new File(saveDir + "/" + getFileName())));
+			for (Term term : termFrequencies.keySet()){
+				docWriter.write(term.getValue() + ":" + termFrequencies.get(term).toString() + "\n");
+			}
+			docWriter.write("\n");
+			for (WordNetSense sense : senseFrequencies.keySet()){
+				docWriter.write(sense.getSenseId() + ":" + senseFrequencies.get(sense).toString() + "\n");
+			}
+			docWriter.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static Document loadDocument(String docPath,
+										String stopWordsPath,
+										String desiredConceptLevel,
+										String desiredWsdType,
+										Integer desiredWsdContext,
+										Boolean doSensesLog,
+										String senseLogDir){
+		stop_words = new File(stopWordsPath);
+		conceptLevel = desiredConceptLevel;
+		wsdType = desiredWsdType;
+		wsdContext = desiredWsdContext;
+		sensesLog = doSensesLog;
+		if (sensesLog){
+			sensesLogPath = senseLogDir + "/" + conceptLevel + " - " + wsdType + " - " + wsdContext;
+			new File(sensesLogPath).mkdir();
+		}
+		System.out.println("Logging: " + sensesLog.toString());
+		System.out.println("Windowing: " + windowContext().toString() + " " + wsdContext.toString());
+		return new Document(new File(docPath));
+	}
+	
+	public static void loadFromDump(String dumpPath, Double desiredConceptAlpha, String desiredConceptLevel){
+		allDocuments = new ArrayList<Document>();
+		conceptLevel = desiredConceptLevel;
+		conceptAlpha = desiredConceptAlpha;
+		Iterator<File> iterator = Arrays.asList(new File(dumpPath).listFiles()).iterator();
+		int filesCounter=0;
+		while ( iterator.hasNext() ){
+			filesCounter ++;
+			System.out.println("loading doc:" + filesCounter);
+			allDocuments.add(new Document(iterator.next(), true));
+		}
+		calculateAllScores();
+		System.out.println("Documents loaded");
+	}
+	
 	public static void loadDocuments(String path,
 									 String stopWordsPath,
 									 String desiredConceptLevel,
 									 Double desiredConceptAlpha,
 									 String desiredWsdType,
 									 Integer desiredWsdContext,
-									 Boolean doSensesLog
+									 Boolean doSensesLog,
+									 String senseLogDir
 	){
 		stop_words = new File(stopWordsPath);
 		allDocuments = new ArrayList<Document>();
@@ -583,7 +684,7 @@ public class Document {
 		Iterator<File> iterator = Arrays.asList(new File(path).listFiles()).iterator();
 		int filesCounter=0;
 		if (sensesLog){
-			sensesLogPath = "data/reuters21578/test_results/Representations/" + conceptLevel + " - " + wsdType + " - " + wsdContext;
+			sensesLogPath = senseLogDir + "/" + conceptLevel + " - " + wsdType + " - " + wsdContext;
 			new File(sensesLogPath).mkdir();
 		}
 		System.out.println("Logging: " + sensesLog.toString());

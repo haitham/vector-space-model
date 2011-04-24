@@ -38,8 +38,13 @@ public class Term {
 		documents.add(document);
 	}
 	
-	public static Term getTerm(String value){
-		String stem = WordNetUtils.getStem(value);
+	public static Term getTerm(String value, Boolean isStem){
+		String stem = null;
+		if (isStem){
+			stem = value;
+		} else {
+			stem = WordNetUtils.getStem(value);
+		}
 		Iterator<Term> iterator = allTerms.iterator();
 		Term term;
 		while ( iterator.hasNext() ){

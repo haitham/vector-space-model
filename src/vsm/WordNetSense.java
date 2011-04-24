@@ -113,6 +113,19 @@ public class WordNetSense {
 		documents.add(document);
 	}
 	
+	public static WordNetSense getSense(Integer senseId){
+		Iterator<Integer> iterator = allSenses.keySet().iterator();
+		while ( iterator.hasNext() ){
+			Integer id = iterator.next();
+			if ( id.equals(senseId) ){
+				return allSenses.get(id);
+			}
+		}
+		WordNetSense sense = new WordNetSense(senseId, WordNetUtils.wordnet.getPos(senseId));
+		allSenses.put(senseId, sense);
+		return sense;
+	}
+	
 	public static List<WordNetSense> getSenses(String term, String pos){
 		List<WordNetSense> senses = new ArrayList<WordNetSense>();
 		int[] newIds = null;

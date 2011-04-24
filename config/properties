@@ -1,4 +1,5 @@
 config.senses_log = true
+config.senses_log_dir = data/reuters21578/test_results/Representations
 config.stop_words_path = config/stopwords
 config.concept_level = synonyms
 config.wsd_type = adapted_lesk

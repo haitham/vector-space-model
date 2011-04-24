@@ -29,10 +29,18 @@ public class VectorSpace {
 							   new Double(properties.getProperty("config.concept_alpha")), 
 							   properties.getProperty("config.wsd_type"),
 							   new Integer(properties.getProperty("config.wsd_context")),
-							   "true".equals(properties.getProperty("config.senses_log"))
+							   "true".equals(properties.getProperty("config.senses_log")),
+							   properties.getProperty("config.senses_log_dir")
 		);
 //		size = Document.getAllDocuments().size();
 //		theta = Math.log(weight(Document.getAllDocuments())) / Math.log(size);
+	}
+	
+	private VectorSpace(Boolean isDump) {
+		loadProperties();
+		Document.loadFromDump(properties.getProperty("data.results_path") + "/dump",
+							  new Double(properties.getProperty("config.concept_alpha")),
+							  properties.getProperty("config.concept_level"));
 	}
 	
 //	private Double weight(List<Document> docs){
@@ -50,6 +58,13 @@ public class VectorSpace {
 	public static VectorSpace getInstance() {
 		if ( vsInstance == null ){
 			vsInstance = new VectorSpace();
+		}
+		return vsInstance;
+	}
+	
+	public static VectorSpace getDumpInstance() {
+		if ( vsInstance == null ){
+			vsInstance = new VectorSpace(true);
 		}
 		return vsInstance;
 	}
