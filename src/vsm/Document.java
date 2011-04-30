@@ -10,15 +10,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-import org.apache.lucene.analysis.StopAnalyzer;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -71,7 +68,11 @@ public class Document {
 	}
 	
 	public static boolean wsdAdaptedLesk(){
-		return ("adapted_lesk".equals(wsdType));
+		return ("adapted_lesk".equals(wsdType) || "adapted_lesk_plus".equals(wsdType));
+	}
+	
+	public static boolean wsdAdaptedLeskPlus(){
+		return ("adapted_lesk_plus".equals(wsdType));
 	}
 	
 	public static boolean wsdExpandedPrimitive(){
@@ -265,6 +266,44 @@ public class Document {
 		return overlap;
 	}
 	
+	private Integer getAdaptedLeskPlusOverlap(WordNetSense sense1, WordNetSense sense2){
+		if (sense1 == null || sense2 == null){
+			return 0;
+		}
+		List<List<Integer[]>> subsequences = new ArrayList<List<Integer[]>>();
+		List<String> gloss1 = sense1.getGlossTerms();
+		List<String> gloss2 = sense2.getGlossTerms();
+		for (int i=0; i<gloss1.size(); i++){
+			for (int j=0; j<gloss2.size(); j++){
+				if (gloss1.get(i).equals(gloss2.get(j))){
+					//search for a prefix
+					Boolean added = false;
+					Integer[] match = {i,j};
+					for (int k=0; k<subsequences.size(); k++){
+						List<Integer[]> subsequence = subsequences.get(k);
+						Integer[] tail = subsequence.get(subsequence.size()-1);
+						if (tail[0].equals(i-1) && tail[1].equals(j-1)){
+							subsequence.add(match);
+							added = true;
+							break;
+						}
+					}
+					if (!added){
+						List<Integer[]> newSubsequence = new ArrayList<Integer[]>();
+						newSubsequence.add(match);
+						subsequences.add(newSubsequence);
+					}
+				}
+			}
+		}
+		Integer overlap = 0;
+		for (List<Integer[]> subsequence : subsequences){
+			Integer subSize = subsequence.size();
+			overlap += (subSize * subSize);
+		}
+		return overlap;
+	}
+	
 	private Integer getAdaptedLeskOverlap(WordNetSense sense1, WordNetSense sense2){
 		if (sense1 == null || sense2 == null){
 			return 0;
@@ -328,7 +367,11 @@ public class Document {
 			// Looping on combination pairs i & j
 			for (int i=0; i<combination.size(); i++){
 				for (int j=i+1; j<combination.size(); j++){
-					combinationScore += getAdaptedLeskOverlap(combination.get(i), combination.get(j));
+					if (wsdAdaptedLesk()){
+						combinationScore += getAdaptedLeskOverlap(combination.get(i), combination.get(j));
+					} else {
+						combinationScore += getAdaptedLeskPlusOverlap(combination.get(i), combination.get(j));
+					}
 				}
 			}
 			
@@ -456,6 +499,8 @@ public class Document {
 				}
 				
 				List<WordNetSense> senses = termSenses.get(term);
+				
+				System.out.print(term.getValue() + " ");
 				
 				if (includeWsd()){
 					senses = refineSenses(termContextIndex, context, termSenses);

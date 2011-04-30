@@ -7,7 +7,7 @@ import java.util.Properties;
 public class IntermediateLoader {
 
 	private static Properties properties;
-	private static String rootPath = "/home/hesham/data/haitham/";
+	private static String rootPath = "";
 	public static void main(String[] args) {
 		properties = new Properties();
 		try {
