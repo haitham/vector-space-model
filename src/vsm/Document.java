@@ -529,6 +529,7 @@ public class Document {
 				}
 				logSenses(term, senses);
 			}
+			System.out.println();
 		}
 	}
 	
