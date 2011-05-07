@@ -1,12 +1,12 @@
 config.senses_log = true
 config.senses_log_dir = data/reuters21578/test_results/Representations
 config.stop_words_path = config/stopwords
-config.concept_level = synonyms
+config.concept_level = hypernyms
 config.wsd_type = simplified_lesk_plus
 config.concept_alpha = 0.5
-config.wsd_context = 8
+config.wsd_context = 5
 data.collection_path = data/reuters21578/test_docs
-data.results_path = data/reuters21578/test_results/synonyms - simplesk+ - 8
+data.results_path = data/reuters21578/test_results/hypernyms - simplesk+ - 5
 data.kmeans_size = 5
 data.hac_size = 5
 data.dbscan_threshold = 0.2
